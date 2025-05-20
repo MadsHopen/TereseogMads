@@ -1,0 +1,41 @@
+from flask import Flask, render_template, request, redirect, url_for
+import os, csv
+
+app = Flask(__name__)
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    email = request.form['email']
+    with open('email_signups.csv', 'a', newline='') as f:
+        csv.writer(f).writerow([email])
+    return redirect(url_for('index'))
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    file = request.files['file']
+    if file and file.filename:
+        file.save(os.path.join(UPLOAD_FOLDER, file.filename))
+    return redirect(url_for('index'))
+
+@app.route('/guestbook', methods=['POST'])
+def guestbook():
+   .form['name']
+    message = request.form['message']
+    with open('guestbook.csv', 'a', newline='') as f:
+        csv.writer(f).writerow([name, message])
+    return redirect(url_for('index'))
+
+@app.route('/view_guestbook')
+def view_guestbook():
+    with open('guestbook.csv', 'r') as f:
+        entries = list(csv.reader(f))[1:]  # skip header
+    return render_template('guestbook.html', entries=entries)
+
+if __name__ == '__main__':
+    app.run(debug=True)
